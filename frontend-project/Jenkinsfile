@@ -36,7 +36,7 @@ pipeline{
 
 
                             Thanks
-                            Jenkins''', subject: 'Failed ${JOB_NAME}', to: 'basil@coit.io'
+                            Jenkins''', subject: 'Failed ${JOB_NAME}', to: 'sharonb9138@gmail.com'
         }
     }
 }
