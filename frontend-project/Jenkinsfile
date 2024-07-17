@@ -1,39 +1,42 @@
-pipeline {
+pipeline{
     agent any
-    triggers {
-        githubPullRequest {
-            cron('H/5 * * * *')
-            useGitHubHooks()
-        }
-    }
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
+    stages{
+        stage("Build"){
+            steps{
+                sh 'cd coit-frontend && npm install && npm run build'
             }
         }
-        stage('Build') {
-            steps {
-                sh './build.sh'
+        stage("Setup Env"){
+            steps{
+                sh "echo Installing Apache"
             }
         }
-        stage('Test') {
-            steps {
-                sh './test.sh'
+        stage("Deploy"){
+            steps{
+                sh "echo Deploying the build folder"
             }
         }
-        stage('Deploy') {
-            steps {
-                sh './deploy.sh'
+        stage("Cleanup"){
+            steps{
+                deleteDir()
             }
         }
     }
-    post {
-        success {
-            echo 'Pipeline completed successfully!'
+    post{
+        success{
+            archiveArtifacts artifacts: '**/build', followSymlinks: false
         }
-        failure {
-            echo 'Pipeline failed.'
+        failure{
+            emailext body: '''Jenkins has failed to build the Job. Please find the information below.
+
+                            Name of the Job: ${JOB_NAME}
+                            Build that failed: ${BUILD_NUMBER}
+
+                            Please check the logs at ${BUILD_URL}
+
+
+                            Thanks
+                            Jenkins''', subject: 'Failed ${JOB_NAME}', to: 'basil@coit.io'
         }
     }
 }
